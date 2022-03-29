@@ -5,11 +5,14 @@ This project demonstrates a basic Hardhat use case. It comes with a sample contr
 Try running some of the following tasks:
 
 ```shell
-npx hardhat accounts
-npx hardhat compile
-npx hardhat clean
-npx hardhat test
-npx hardhat node
-node scripts/sample-script.js
-npx hardhat help
+ganache -b 3
+npm run depoly-localhost
+```
+
+*OR*
+
+Check out `./hardhat.config.js`, modify the section about Rinkeby, and then:
+
+```shell
+npm run depoly-rinkeby
 ```
