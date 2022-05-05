@@ -4,7 +4,7 @@ const {
 const packet = require('dns-packet');
 
 const ROOT_NODE = '0x00000000000000000000000000000000'
-async function deployDNSSEC(web3, accounts, ens, resolver) {
+async function deployDNSSEC(web3, accounts, ens, resolver, tlds) {
   const { sha3 } = web3.utils
   function deploy(contractJSON, ...args) {
     const contract = new web3.eth.Contract(contractJSON.abi)
@@ -51,9 +51,12 @@ async function deployDNSSEC(web3, accounts, ens, resolver) {
   const dnssecOld = await deploy(DNSSECOLD, dnsAnchors.encode(anchors))
   const dnssecNew = await deploy(DNSSECNEW, dnsAnchors.encode(anchors))
   const suffixes = await deploy(SimplePublicSuffixList)
-  await suffixes.methods
-    .addPublicSuffixes(['0x' + packet.name.encode('xyz').toString('hex')])
-    .send({ from: accounts[0] });
+
+  let suf = []
+  tlds.map(tld => suf.push("0x" + packet.name.encode(tld).toString("hex")));
+  console.log("suf =", suf)
+  // await suffixes.methods.addPublicSuffixes(['0x' + packet.name.encode(tld).toString('hex')]).send({ from: accounts[0] });
+  await suffixes.methods.addPublicSuffixes(suf).send({ from: accounts[0] });
 
   const registrarOld = await deploy(DnsRegistrarOld, dnssecOld._address, ens._address)
   const registrarNew = await deploy(DnsRegistrarNew, dnssecNew._address, suffixes._address, ens._address)
@@ -96,7 +99,10 @@ async function deployDNSSEC(web3, accounts, ens, resolver) {
     console.log(`The owner of ${tld} doamin is `, owner)
   }
   await setupDomain(dnssecOld, registrarOld, 'art')
-  await setupDomain(dnssecNew, registrarNew, 'xyz')
+
+  for (let tld of tlds) {
+    await setupDomain(dnssecNew, registrarNew, tld);
+  }
 
   return { dnssecOld, dnssecNew }
 }
