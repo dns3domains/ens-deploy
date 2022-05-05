@@ -7,6 +7,7 @@
     "deploy-rinkeby": "hardhat run --network rinkeby scripts/deploy.js",
     "deploy-esc": "hardhat run --network esc scripts/deploy.js",
     "deploy-dns-esc": "hardhat run --network esc scripts/deployDNS.js",
+    "deploy-price-esc": "hardhat run --network esc scripts/deployPriceOracle.js",
     "verify": "hardhat verify --network rinkeby 0x98325eDBE53119bB4A5ab7Aa35AA4621f49641E6 0x0226AeB1d1F6906DC93b6D50c30f128745c0B7Ee"
   },
   "devDependencies": {
