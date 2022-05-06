@@ -1,6 +1,8 @@
 pragma solidity >=0.8.4;
 
 interface ChainlinkAggregatorV3Interface {
+    function decimals() external view returns (uint8);
+
     function latestRoundData()
         external
         view
@@ -20,8 +22,12 @@ interface AggregatorInterface {
 contract WrappedPriceOracle is AggregatorInterface {
     ChainlinkAggregatorV3Interface private _priceOracle;
 
-    constructor(address priceOracle) public {
+    constructor(address priceOracle) {
         _priceOracle = ChainlinkAggregatorV3Interface(priceOracle);
+    }
+
+    function decimals() public view returns (uint8 dec) {
+        dec = _priceOracle.decimals();
     }
 
     function latestAnswer() public view override returns (int256) {
