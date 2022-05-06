@@ -68,6 +68,7 @@ async function main() {
   const registrarMigrationJSON = loadContract('ethregistrar-202', 'RegistrarMigration')
   const EthRegistrarSubdomainRegistrarJSON = loadContract('subdomain-registrar', 'EthRegistrarSubdomainRegistrar')
   const ENSMigrationSubdomainRegistrarJSON = loadContract('subdomain-registrar', 'ENSMigrationSubdomainRegistrar')
+  const WrappedPriceOracle = await ethers.getContractFactory("WrappedPriceOracle");
 
   console.log('Deploying from account ', accounts[0])
   /* Deploy the main contracts  */
@@ -197,19 +198,33 @@ async function main() {
   // Create the new controller
 
   console.log('Going to set dummy oracle')
-  // Dummy oracle with 1 ETH == 3000 USD
-  const dummyOracleRate = toBN(300000000 * 1000)
-  const dummyOracle = await deploy(web3, accounts[0], dummyOracleJSON, dummyOracleRate)
-  const latestAnswer = await dummyOracle.methods.latestAnswer().call()
-  console.log('Dummy USD Rate', { latestAnswer })
+  // // Dummy oracle with 1 ETH == 3000 USD
+  // const dummyOracleRate = toBN(300000000 * 1000)
+  // const dummyOracle = await deploy(web3, accounts[0], dummyOracleJSON, dummyOracleRate)
+  // const latestAnswer = await dummyOracle.methods.latestAnswer().call()
+  // console.log('Dummy USD Rate', { latestAnswer })
+  const wrappedPriceOracle = await WrappedPriceOracle.deploy("0xe848389b35Ca2E9A06faa50b6644C26A871BdD12");
+  await wrappedPriceOracle.deployed();
+  const latestAnswer = await wrappedPriceOracle.latestAnswer()
+  console.log('USD Rate', latestAnswer, wrappedPriceOracle.address);
 
-  const premium = toBN('100000000000000000000000') // 100000 * 1e18
+  const ps = [
+    0,
+    0,
+    ((640 / (latestAnswer / 1e8) / 365 / DAYS) * 1e18).toFixed(0),
+    ((160 / (latestAnswer / 1e8) / 365 / DAYS) * 1e18).toFixed(0),
+    ((5 / (latestAnswer / 1e8) / 365 / DAYS) * 1e18).toFixed(0)
+  ];
+  console.log('ps', ps);
+
+  // const premium = toBN('100000000000000000000000') // 100000 * 1e18
+  const premium = toBN('1000000000000000000') // 1e18
   const decreaseDuration = toBN(28 * DAYS)
   const decreaseRate = premium.div(decreaseDuration)
   // Oracle prices from https://etherscan.io/address/0xb9d374d0fe3d8341155663fae31b7beae0ae233a#events
   // 0,0, 127, 32, 1
-  const linearPremiumPriceOracle = await deploy(web3, accounts[0], linearPremiumPriceOracleJSON, dummyOracle._address, [0, 0, toBN(20294266869609), toBN(5073566717402), toBN(158548959919)], premium, decreaseRate)
-  const exponentialPremiumPriceOracle = await deploy(web3, accounts[0], exponentialPremiumPriceOracleJSON, dummyOracle._address, [0, 0, toBN(20294266869609), toBN(5073566717402), toBN(158548959919)], 21)
+  const linearPremiumPriceOracle = await deploy(web3, accounts[0], linearPremiumPriceOracleJSON, dummyOracle._address, ps, premium, decreaseRate)
+  const exponentialPremiumPriceOracle = await deploy(web3, accounts[0], exponentialPremiumPriceOracleJSON, dummyOracle._address, ps, 21)
   const newController = await deploy(web3, accounts[0], controllerJSON, newBaseRegistrar._address, exponential ? exponentialPremiumPriceOracle._address : linearPremiumPriceOracle._address, 2, 86400)
 
   // Create the new resolver

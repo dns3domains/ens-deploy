@@ -1,12 +1,7 @@
-const { namehash } = require("ethers/lib/utils");
 const hre = require("hardhat");
 const ethers = hre.ethers;
 const Web3 = require('web3');
-const deployDNSSEC = require("./deployDNSSEC");
 const { loadContract } = require("./utils");
-
-const dnssec = true;
-const tld = "ela";
 
 async function main() {
 	hre.Web3 = Web3;
@@ -16,18 +11,9 @@ async function main() {
 
 	const signers = await ethers.getSigners();
 	const accounts = signers.map(s => s.address);
-	console.log("accounts:", accounts);
 
-	const tldHash = namehash("ela");
-	const tldSha = web3.utils.sha3("ela");
 
-	const resolverJSON = loadContract('resolvers', 'PublicResolver')
-	const ENSWithFallbackJSON = loadContract('registry', 'ENSRegistryWithFallback')
-	const DnsRegistrarNew = loadContract('dnsregistrar', 'DNSRegistrar')
-	const dummyOracleJSON = loadContract('ethregistrar', 'DummyOracle')
-	const controllerJSON = loadContract('ethregistrar', 'ETHRegistrarController')
 	const linearPremiumPriceOracleJSON = loadContract('ethregistrar', 'LinearPremiumPriceOracle')
-	const newBaseRegistrarJSON = loadContract('ethregistrar', 'BaseRegistrarImplementation')
 	const WrappedPriceOracle = await ethers.getContractFactory("WrappedPriceOracle");
 
 	const wrappedPriceOracle = await WrappedPriceOracle.deploy("0xe848389b35Ca2E9A06faa50b6644C26A871BdD12");
