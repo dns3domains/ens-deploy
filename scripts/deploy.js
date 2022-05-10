@@ -197,7 +197,7 @@ async function main() {
   await newBaseRegistrar.methods.addController(accounts[0]).send({ from: accounts[0] })
   // Create the new controller
 
-  console.log('Going to set dummy oracle')
+  // console.log('Going to set dummy oracle')
   // // Dummy oracle with 1 ETH == 3000 USD
   // const dummyOracleRate = toBN(300000000 * 1000)
   // const dummyOracle = await deploy(web3, accounts[0], dummyOracleJSON, dummyOracleRate)

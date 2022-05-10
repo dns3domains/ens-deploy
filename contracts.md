@@ -73,3 +73,26 @@ graph TD;
 		reverse -.".setName()".->resolver1[newResolver]
 		resolver1 -.".setName()".->end2(反向注册成功)
 ```
+
+## DNSSEC验证流程
+
+```mermaid
+graph TD;
+		users(用户) --> domains[输入域名]
+		domains --> registrar[取得Registrar]
+		registrar --> dnsOwer[取得DNS OWNER]
+		dnsOwer --> address0{是否为0x0}
+		domains --> txt[请求TXT记录]
+		txt --> rrsig[请求RRSIG]
+		rrsig --> rrset[用RRSIG验证TXT RRSET]
+		rrset --> owner[取得所有者]
+		owner --> eq{比对}
+		address0 -- 否 --> eq
+		owner --> dnsKey[得到DNS KEY公钥]
+		dnsKey --> ds[取得DS公钥哈希]
+		ds --> proofs[取得proofs]
+		eq -- 相同 --> submit[提交证明]
+		address0 -- 是 --> submit
+		proofs --> submit
+		submit --> save(把Owner写入合约)
+```

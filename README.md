@@ -1,18 +1,17 @@
-# Basic Sample Hardhat Project
+# 部署说明
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+## 准备工作
 
-Try running some of the following tasks:
+1. 检查`/hardhat.config.js`，补充目标链的相关配置。
+2. 如果部署的同时要增加DNSSEC支持，请修改`/scripts/deployDNS.js`的`tlds`域名数组。
+3. 需要确保位于`/scripts/deploy.js` `L206`的本币priceOracle（合约名`wrappedPriceOracle`）是实现了`Chainlink`和`AggregatorInterface`接口的合约。
+4. 需要确保位于`/scripts/deploy.js` `L211`的域名定价数组ps内数组是正确的。
 
-```shell
-ganache -b 3
-npm run depoly-localhost
-```
-
-*OR*
-
-Check out `./hardhat.config.js`, modify the section about Rinkeby, and then:
+## 部署主合约
 
 ```shell
-npm run depoly-rinkeby
+hardhat run --network [network in hardhat.config.js] scripts/deploy.js &&
+hardhat run --network [network in hardhat.config.js] scripts/deployDNS.js
 ```
+
+**注意：请注意保存所有的输出信息。**
