@@ -5,7 +5,7 @@
 ### 准备工作：
 
 1. 检查`/hardhat.config.js`，补充目标链的相关配置。
-2. 需要确保位于`/scripts/deploy.js` `L206`的本币priceOracle（合约名`wrappedPriceOracle`）是实现了`Chainlink`和`AggregatorInterface`接口的合约。
+2. 需要确保位于`/scripts/deploy.js` `L206`的本币priceOracle（合约名`wrappedPriceOracle`）是实现了`Chainlink`的`AggregatorInterface`接口的合约。
 3. 需要确保位于`/scripts/deploy.js` `L211`的域名定价数组ps内数组是正确的。
 
 ### 然后执行：
