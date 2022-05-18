@@ -208,12 +208,13 @@ async function main() {
   const latestAnswer = await wrappedPriceOracle.latestAnswer()
   console.log('USD Rate', latestAnswer, wrappedPriceOracle.address);
 
+  const usdPrice = [0, 0, 640, 160, 5]
   const ps = [
-    0,
-    0,
-    ((640 / (latestAnswer / 1e8) / 365 / DAYS) * 1e18).toFixed(0),
-    ((160 / (latestAnswer / 1e8) / 365 / DAYS) * 1e18).toFixed(0),
-    ((5 / (latestAnswer / 1e8) / 365 / DAYS) * 1e18).toFixed(0)
+    usdPrice[0],
+    usdPrice[1],
+    ((usdPrice[2] / (latestAnswer / 1e8) / 365 / DAYS) * 1e18).toFixed(0),
+    ((usdPrice[3] / (latestAnswer / 1e8) / 365 / DAYS) * 1e18).toFixed(0),
+    ((usdPrice[4] / (latestAnswer / 1e8) / 365 / DAYS) * 1e18).toFixed(0)
   ];
   console.log('ps', ps);
 
