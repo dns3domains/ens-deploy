@@ -13,7 +13,7 @@
   "devDependencies": {
     "@ensdomains/dnssec-oracle-anchors": "^0.0.1",
     "@ensdomains/ens-archived-contracts": "^0.0.1",
-    "@ensdomains/ens-contracts": "^0.0.11",
+    "@ensdomains/ens-contracts": "git+https://github.com/siyushin/ens-contracts.git#8a08ae3d02c4f22d396cbfba537e8a0586440b58",
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@nomiclabs/hardhat-waffle": "^2.0.3",
