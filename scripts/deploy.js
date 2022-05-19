@@ -203,10 +203,11 @@ async function main() {
   // const dummyOracle = await deploy(web3, accounts[0], dummyOracleJSON, dummyOracleRate)
   // const latestAnswer = await dummyOracle.methods.latestAnswer().call()
   // console.log('Dummy USD Rate', { latestAnswer })
-  const wrappedPriceOracle = await WrappedPriceOracle.deploy("0xe848389b35Ca2E9A06faa50b6644C26A871BdD12");
-  await wrappedPriceOracle.deployed();
-  const latestAnswer = await wrappedPriceOracle.latestAnswer()
-  console.log('USD Rate', latestAnswer, wrappedPriceOracle.address);
+  const dummyOracle = await WrappedPriceOracle.deploy("0xe848389b35Ca2E9A06faa50b6644C26A871BdD12");
+  await dummyOracle.deployed();
+  const latestAnswer = await dummyOracle.latestAnswer()
+  console.log('USD Rate', latestAnswer, dummyOracle.address);
+  dummyOracle._address = dummyOracle.address;
 
   const usdPrice = [0, 0, 640, 160, 5]
   const ps = [
