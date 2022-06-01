@@ -1,6 +1,6 @@
 const util = require('util')
 const moment = require('moment')
-const DAYS = 24 * 60 * 60;
+const DAYS = 86400;
 
 const advanceTime = util.promisify(function (web3, delay, done) {
   return web3.currentProvider.send(

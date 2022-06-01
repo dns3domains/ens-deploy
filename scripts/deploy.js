@@ -197,36 +197,30 @@ async function main() {
   await newBaseRegistrar.methods.addController(accounts[0]).send({ from: accounts[0] })
   // Create the new controller
 
-  // console.log('Going to set dummy oracle')
-  // // Dummy oracle with 1 ETH == 3000 USD
-  // const dummyOracleRate = toBN(300000000 * 1000)
-  // const dummyOracle = await deploy(web3, accounts[0], dummyOracleJSON, dummyOracleRate)
-  // const latestAnswer = await dummyOracle.methods.latestAnswer().call()
-  // console.log('Dummy USD Rate', { latestAnswer })
-  const dummyOracle = await WrappedPriceOracle.deploy("0xe848389b35Ca2E9A06faa50b6644C26A871BdD12");
+  const dummyOracle = await WrappedPriceOracle.deploy("0xe848389b35Ca2E9A06faa50b6644C26A871BdD12");　// 这里需要指定实现了AggregatorInterface接口的price oracle合约地址。
   await dummyOracle.deployed();
   const latestAnswer = await dummyOracle.latestAnswer()
   console.log('USD Rate', latestAnswer, dummyOracle.address);
   dummyOracle._address = dummyOracle.address;
 
-  const usdPrice = [0, 0, 640, 160, 5]
-  const ps = [
+  const secondsOfYear = 365 * DAYS;
+  const currencyPrice = latestAnswer / 1e8;
+  const currencyDecimals = 18; // 这里指定部署目标链本币的decimals。
+  const usdPrice = [0, 0, 640, 160, 5]; // 这里指定域名价格，单位为USD/年。
+  const priceArray = [
     usdPrice[0],
     usdPrice[1],
-    ((usdPrice[2] / (latestAnswer / 1e8) / 365 / DAYS) * 1e18).toFixed(0),
-    ((usdPrice[3] / (latestAnswer / 1e8) / 365 / DAYS) * 1e18).toFixed(0),
-    ((usdPrice[4] / (latestAnswer / 1e8) / 365 / DAYS) * 1e18).toFixed(0)
+    ((usdPrice[2] / currencyPrice / secondsOfYear) * (10 * currencyDecimals)).toFixed(0),
+    ((usdPrice[3] / currencyPrice / secondsOfYear) * (10 * currencyDecimals)).toFixed(0),
+    ((usdPrice[4] / currencyPrice / secondsOfYear) * (10 * currencyDecimals)).toFixed(0)
   ];
-  console.log('ps', ps);
+  console.log('priceArray', priceArray);
 
-  // const premium = toBN('100000000000000000000000') // 100000 * 1e18
-  const premium = toBN('1000000000000000000') // 1e18
+  const premium = toBN('1000000000000000000') // 这里指定premium的价格，关于premium可参考　https://docs.ens.domains/frequently-asked-questions#what-happens-if-i-forget-to-extend-the-registration-of-a-name
   const decreaseDuration = toBN(28 * DAYS)
   const decreaseRate = premium.div(decreaseDuration)
-  // Oracle prices from https://etherscan.io/address/0xb9d374d0fe3d8341155663fae31b7beae0ae233a#events
-  // 0,0, 127, 32, 1
-  const linearPremiumPriceOracle = await deploy(web3, accounts[0], linearPremiumPriceOracleJSON, dummyOracle._address, ps, premium, decreaseRate)
-  const exponentialPremiumPriceOracle = await deploy(web3, accounts[0], exponentialPremiumPriceOracleJSON, dummyOracle._address, ps, 21)
+  const linearPremiumPriceOracle = await deploy(web3, accounts[0], linearPremiumPriceOracleJSON, dummyOracle._address, priceArray, premium, decreaseRate)
+  const exponentialPremiumPriceOracle = await deploy(web3, accounts[0], exponentialPremiumPriceOracleJSON, dummyOracle._address, priceArray, 21)
   const newController = await deploy(web3, accounts[0], controllerJSON, newBaseRegistrar._address, exponential ? exponentialPremiumPriceOracle._address : linearPremiumPriceOracle._address, 2, 86400)
 
   // Create the new resolver
