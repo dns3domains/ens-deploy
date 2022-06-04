@@ -58,7 +58,6 @@ async function main() {
   const priceOracleJSON = loadContract('ethregistrar-202', 'SimplePriceOracle')
   const linearPremiumPriceOracleJSON = loadContract('ethregistrar', 'LinearPremiumPriceOracle')
   const exponentialPremiumPriceOracleJSON = loadContract('ethregistrar', 'ExponentialPremiumPriceOracle')
-  const dummyOracleJSON = loadContract('ethregistrar', 'DummyOracle')
   const controllerJSON = loadContract('ethregistrar', 'ETHRegistrarController')
   const bulkRenewalJSON = loadContract('ethregistrar', 'BulkRenewal')
   const legacyAuctionRegistrarSimplifiedJSON = loadContract('ens-022', 'HashRegistrar')
