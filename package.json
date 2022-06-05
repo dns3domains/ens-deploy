@@ -3,7 +3,7 @@
   "scripts": {
     "accounts": "hardhat accounts",
     "compile": "hardhat compile",
-    "deploy-localhost": "hardhat run --network localhost scripts/deploy.js",
+    "deploy-local": "hardhat run --network localhost scripts/deploy.js",
     "deploy-rinkeby": "hardhat run --network rinkeby scripts/deploy.js",
     "deploy-esc": "hardhat run --network esc scripts/deploy.js",
     "deploy-dns-esc": "hardhat run --network esc scripts/deployDNS.js",
@@ -13,7 +13,7 @@
   "devDependencies": {
     "@ensdomains/dnssec-oracle-anchors": "^0.0.1",
     "@ensdomains/ens-archived-contracts": "^0.0.1",
-    "@ensdomains/ens-contracts": "git+https://github.com/siyushin/ens-contracts.git#8a08ae3d02c4f22d396cbfba537e8a0586440b58",
+    "@ensdomains/ens-contracts": "git+https://github.com/siyushin/ens-contracts.git#c5fed08d9dac713302c16626e6677bcfd7c648c6",
     "@nomiclabs/hardhat-ethers": "^2.0.5",
     "@nomiclabs/hardhat-etherscan": "^3.0.3",
     "@nomiclabs/hardhat-waffle": "^2.0.3",

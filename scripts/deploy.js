@@ -8,8 +8,8 @@ const { DAYS, registerName, loadContract, deploy } = require("./utils");
 const { BigNumber } = require("ethers");
 const deployDNSSEC = require("./deployDNSSEC");
 // ipfs://QmTeW79w7QQ6Npa3b1d5tANreCDxF2iDaAPsDvW6KtLmfB
-const contenthash = '0xe301017012204edd2984eeaf3ddf50bac238ec95c5713fb40b5e428b508fdbe55d3b9f155ffe';
-const content = '0x736f6d65436f6e74656e74000000000000000000000000000000000000000000';
+// const contenthash = '0xe301017012204edd2984eeaf3ddf50bac238ec95c5713fb40b5e428b508fdbe55d3b9f155ffe';
+// const content = '0x736f6d65436f6e74656e74000000000000000000000000000000000000000000';
 const tld = "ela";
 const toBN = require('web3-utils').toBN
 const {
@@ -179,9 +179,9 @@ async function main() {
   await resolver.methods.setAddr(namehash('oldresolver.' + tld), oldResolver._address).send({ from: accounts[0] })
 
   // /* Resolve the resolver.eth content to a 32 byte content hash */
-  console.log('Setting up contenthash')
-  await resolver.methods.setContenthash(namehash('resolver.' + tld), contenthash).send({ from: accounts[0], gas: 5000000 })
-  await oldResolver.methods.setContent(namehash('oldresolver.' + tld), content).send({ from: accounts[0] })
+  // console.log('Setting up contenthash')
+  // await resolver.methods.setContenthash(namehash('resolver.' + tld), contenthash).send({ from: accounts[0], gas: 5000000 })
+  // await oldResolver.methods.setContent(namehash('oldresolver.' + tld), content).send({ from: accounts[0] })
 
   /* Setup a reverse for account[0] to eth tld  */
   await oldReverseRegistrar.methods.setName(tld).send({ from: accounts[0], gas: 1000000 })
@@ -196,11 +196,24 @@ async function main() {
   await newBaseRegistrar.methods.addController(accounts[0]).send({ from: accounts[0] })
   // Create the new controller
 
-  const dummyOracle = await WrappedPriceOracle.deploy("0xe848389b35Ca2E9A06faa50b6644C26A871BdD12");　// 这里需要指定实现了AggregatorInterface接口的price oracle合约地址。
-  await dummyOracle.deployed();
-  const latestAnswer = await dummyOracle.latestAnswer()
-  console.log('USD Rate', latestAnswer, dummyOracle.address);
-  dummyOracle._address = dummyOracle.address;
+  // 测试部署用
+  console.log('Going to set dummy oracle')
+  const dummyOracleJSON = loadContract('ethregistrar', 'DummyOracle')
+  const dummyOracleRate = toBN(300000000 * 1000)
+  const priceOracleOfCurrentNetwork = await deploy(
+    web3,
+    accounts[0],
+    dummyOracleJSON,
+    dummyOracleRate
+  )
+  const latestAnswer = await priceOracleOfCurrentNetwork.methods.latestAnswer().call()
+  console.log('Dummy USD Rate', { latestAnswer })
+  // 正式部署时用，部署priceOracle时需指定当前链上的AggregatorInterface实现。
+  // const priceOracleOfCurrentNetwork = await WrappedPriceOracle.deploy("0xe848389b35Ca2E9A06faa50b6644C26A871BdD12");　// 这里需要指定实现了AggregatorInterface接口的price oracle合约地址。
+  // await priceOracleOfCurrentNetwork.deployed();
+  // const latestAnswer = await priceOracleOfCurrentNetwork.latestAnswer()
+  // console.log('USD Rate', latestAnswer, priceOracleOfCurrentNetwork.address);
+  // priceOracleOfCurrentNetwork._address = priceOracleOfCurrentNetwork.address;
 
   const secondsOfYear = 365 * DAYS;
   const currencyPrice = latestAnswer / 1e8;
@@ -209,17 +222,17 @@ async function main() {
   const priceArray = [
     usdPrice[0],
     usdPrice[1],
-    ((usdPrice[2] / currencyPrice / secondsOfYear) * (10 * currencyDecimals)).toFixed(0),
-    ((usdPrice[3] / currencyPrice / secondsOfYear) * (10 * currencyDecimals)).toFixed(0),
-    ((usdPrice[4] / currencyPrice / secondsOfYear) * (10 * currencyDecimals)).toFixed(0)
+    ((usdPrice[2] / currencyPrice / secondsOfYear) * (10 ** currencyDecimals)).toFixed(0),
+    ((usdPrice[3] / currencyPrice / secondsOfYear) * (10 ** currencyDecimals)).toFixed(0),
+    ((usdPrice[4] / currencyPrice / secondsOfYear) * (10 ** currencyDecimals)).toFixed(0)
   ];
   console.log('priceArray', priceArray);
 
   const premium = toBN('1000000000000000000') // 这里指定premium的价格，关于premium可参考　https://docs.ens.domains/frequently-asked-questions#what-happens-if-i-forget-to-extend-the-registration-of-a-name
   const decreaseDuration = toBN(28 * DAYS)
   const decreaseRate = premium.div(decreaseDuration)
-  const linearPremiumPriceOracle = await deploy(web3, accounts[0], linearPremiumPriceOracleJSON, dummyOracle._address, priceArray, premium, decreaseRate)
-  const exponentialPremiumPriceOracle = await deploy(web3, accounts[0], exponentialPremiumPriceOracleJSON, dummyOracle._address, priceArray, 21)
+  const linearPremiumPriceOracle = await deploy(web3, accounts[0], linearPremiumPriceOracleJSON, priceOracleOfCurrentNetwork._address, priceArray, premium, decreaseRate)
+  const exponentialPremiumPriceOracle = await deploy(web3, accounts[0], exponentialPremiumPriceOracleJSON, priceOracleOfCurrentNetwork._address, priceArray, 21)
   const newController = await deploy(web3, accounts[0], controllerJSON, newBaseRegistrar._address, exponential ? exponentialPremiumPriceOracle._address : linearPremiumPriceOracle._address, 2, 86400)
 
   // Create the new resolver
@@ -238,8 +251,8 @@ async function main() {
     await newResolver.methods.setAddr(hash, newResolver._address).send({ from: accounts[0] })
 
     // ipfs://QmTeW79w7QQ6Npa3b1d5tANreCDxF2iDaAPsDvW6KtLmfB
-    console.log('setting up contenthash for', name)
-    await newResolver.methods.setContenthash(hash, contenthash).send({ from: accounts[0] })
+    // console.log('setting up contenthash for', name)
+    // await newResolver.methods.setContenthash(hash, contenthash).send({ from: accounts[0] })
 
     console.log('finished setting up', name)
   }
@@ -302,7 +315,7 @@ async function main() {
   await newEns.methods.setSubnodeOwner(namehash('data.' + tld), sha3('eth-usd'), accounts[0]).send({ from: accounts[0] })
   await newEns.methods.setSubnodeOwner(namehash('ens.' + tld), sha3('oracle'), accounts[0]).send({ from: accounts[0] })
   await addNewResolverAndRecords('eth-usd.data.' + tld)
-  await newResolver.methods.setAddr(namehash('eth-usd.data.' + tld), dummyOracle._address).send({ from: accounts[0] })
+  await newResolver.methods.setAddr(namehash('eth-usd.data.' + tld), priceOracleOfCurrentNetwork._address).send({ from: accounts[0] })
   await addNewResolverAndRecords('oracle.ens.' + tld)
   await newResolver.methods.setText(namehash('oracle.ens.' + tld), 'algorithm', exponential ? 'exponential' : 'linear').send({ from: accounts[0] })
 
@@ -324,7 +337,7 @@ async function main() {
     reverseRegistrarAddress: newReverseRegistrar && newReverseRegistrar._address,
     reverseRegistrarOwnerAddress: accounts[0],
     exponentialPremiumPriceOracle: exponentialPremiumPriceOracle._address,
-    dummyOracle: dummyOracle._address,
+    priceOracleOfCurrentNetwork: priceOracleOfCurrentNetwork._address,
   }
 
   let contractNames = Object.keys(response)
