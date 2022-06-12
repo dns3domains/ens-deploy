@@ -16,16 +16,16 @@ async function main() {
 	const secondsOfYear = 365 * DAYS;
 	const currencyDecimals = 18; // 这里指定部署目标链本币的decimals。
 	const usdPrice = config.priceInUSD; // 这里指定域名价格，单位为USD/年。
-	console.log('域名价格（USD/s）数组：', usdPrice);
+	console.log('域名价格（USD/year）数组：', usdPrice);
 
 	const priceArray = [
-		new BigNumber(usdPrice[0]).dividedBy(secondsOfYear).shiftedBy(8).toFixed(0),
-		new BigNumber(usdPrice[1]).dividedBy(secondsOfYear).shiftedBy(8).toFixed(0),
-		new BigNumber(usdPrice[2]).dividedBy(secondsOfYear).shiftedBy(8).toFixed(0),
-		new BigNumber(usdPrice[3]).dividedBy(secondsOfYear).shiftedBy(8).toFixed(0),
-		new BigNumber(usdPrice[4]).dividedBy(secondsOfYear).shiftedBy(8).toFixed(0)
+		new BigNumber(usdPrice[0]).shiftedBy(currencyDecimals).dividedBy(secondsOfYear).toFixed(0),
+		new BigNumber(usdPrice[1]).shiftedBy(currencyDecimals).dividedBy(secondsOfYear).toFixed(0),
+		new BigNumber(usdPrice[2]).shiftedBy(currencyDecimals).dividedBy(secondsOfYear).toFixed(0),
+		new BigNumber(usdPrice[3]).shiftedBy(currencyDecimals).dividedBy(secondsOfYear).toFixed(0),
+		new BigNumber(usdPrice[4]).shiftedBy(currencyDecimals).dividedBy(secondsOfYear).toFixed(0)
 	];
-	console.log('域名价格（ETH/s）数组：', priceArray);
+	console.log('域名价格（attoUSD/s）数组：', priceArray);
 
 	const premium = config.premium;
 	console.log('premium =', premium);
