@@ -2,6 +2,7 @@ const { default: BigNumber } = require("bignumber.js");
 const hre = require("hardhat");
 const ethers = hre.ethers;
 const config = require("../priceConfig.json");
+const { loadContract } = require("./utils");
 
 const DAYS = 86400;
 
@@ -33,8 +34,9 @@ async function main() {
 	const decreaseRate = new BigNumber(premium).dividedBy(decreaseDuration).toFixed(0);
 	console.log('decreaseRate =', decreaseRate);
 
-	const LinearPremiumPriceOracle = await ethers.getContractFactory("LinearPremiumPriceOracle");
-	const linearPremiumPriceOracle = await LinearPremiumPriceOracle.deploy(priceOracle.address, priceArray, premium, decreaseRate);
+	const linearPremiumPriceOracleJson = loadContract('ethregistrar', 'LinearPremiumPriceOracle')
+	const linearPremiumPriceOracleFactory = await ethers.getContractFactoryFromArtifact(linearPremiumPriceOracleJson);
+	const linearPremiumPriceOracle = await linearPremiumPriceOracleFactory.deploy(priceOracle.address, priceArray, premium, decreaseRate);
 	await linearPremiumPriceOracle.deployed();
 	console.log('linearPremiumPriceOracle:', linearPremiumPriceOracle.address);
 
