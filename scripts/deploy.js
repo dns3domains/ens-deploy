@@ -224,15 +224,14 @@ async function main() {
   console.log('USD Rate', latestAnswer);
 
   const secondsOfYear = 365 * DAYS;
-  const currencyPrice = new BigNumber(latestAnswer).shiftedBy(-oracleDecimals);
   const currencyDecimals = config.currencyDecimals; // 这里指定部署目标链本币的decimals。
   const usdPrice = config.priceInUSD; // 这里指定域名价格，单位为USD/年。
   const priceArray = [
-    usdPrice[0],
-    usdPrice[1],
-    new BigNumber(usdPrice[2]).dividedBy(currencyPrice).dividedBy(secondsOfYear).shiftedBy(currencyDecimals).toFixed(0),
-		new BigNumber(usdPrice[3]).dividedBy(currencyPrice).dividedBy(secondsOfYear).shiftedBy(currencyDecimals).toFixed(0),
-		new BigNumber(usdPrice[4]).dividedBy(currencyPrice).dividedBy(secondsOfYear).shiftedBy(currencyDecimals).toFixed(0)
+    new BigNumber(usdPrice[0]).shiftedBy(currencyDecimals).dividedBy(secondsOfYear).toFixed(0),
+    new BigNumber(usdPrice[1]).shiftedBy(currencyDecimals).dividedBy(secondsOfYear).toFixed(0),
+    new BigNumber(usdPrice[2]).shiftedBy(currencyDecimals).dividedBy(secondsOfYear).toFixed(0),
+    new BigNumber(usdPrice[3]).shiftedBy(currencyDecimals).dividedBy(secondsOfYear).toFixed(0),
+    new BigNumber(usdPrice[4]).shiftedBy(currencyDecimals).dividedBy(secondsOfYear).toFixed(0)
   ];
   console.log('priceArray', priceArray);
 
