@@ -3,12 +3,9 @@
   "scripts": {
     "accounts": "hardhat accounts",
     "compile": "hardhat compile",
-    "deploy-local": "hardhat run --network localhost scripts/deploy.js",
-    "deploy-rinkeby": "hardhat run --network rinkeby scripts/deploy.js",
-    "deploy-esc": "hardhat run --network esc scripts/deploy.js",
-    "deploy-dns-esc": "hardhat run --network esc scripts/deployDNS.js",
-    "deploy-price-esc": "hardhat run --network esc scripts/deployPriceOracle.js",
-    "verify": "hardhat verify --network rinkeby 0x98325eDBE53119bB4A5ab7Aa35AA4621f49641E6 0x0226AeB1d1F6906DC93b6D50c30f128745c0B7Ee"
+    "update-price": "hardhat run --network \"${npm_config_network}\" scripts/updatePriceOracle.js",
+    "deploy": "hardhat run --network \"${npm_config_network}\" scripts/deploy.js",
+    "deploy-dnssec": "hardhat run --network \"${npm_config_network}\" scripts/deployDNS.js"
   },
   "devDependencies": {
     "@ensdomains/dnssec-oracle-anchors": "^0.0.1",
@@ -28,5 +25,8 @@
     "table": "^5.4.6",
     "web3": "^1.7.3",
     "web3-utils": "^1.7.1"
+  },
+  "dependencies": {
+    "bignumber.js": "^9.0.2"
   }
 }

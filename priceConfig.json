@@ -1,0 +1,15 @@
+{
+	"priceOracle": "0x8c8dD24057fDB99b89b95419E56Fe746eECeBec3",
+	"priceInUSD": [
+		0,
+		0,
+		4,
+		2,
+		1
+	],
+	"premium": "1000000000000000000",
+	"currencyDecimals": 18,
+	"contracts": {
+		"controller": "0xe702C0C242b88bf94F2333163FB5032661388CE2"
+	}
+}

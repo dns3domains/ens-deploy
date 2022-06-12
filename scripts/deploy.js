@@ -5,12 +5,10 @@ const ROOT_NODE = '0x00000000000000000000000000000000';
 const Web3 = require('web3');
 const interfaces = require('./interfaces');
 const { DAYS, registerName, loadContract, deploy } = require("./utils");
-const { BigNumber } = require("ethers");
 const deployDNSSEC = require("./deployDNSSEC");
 // ipfs://QmTeW79w7QQ6Npa3b1d5tANreCDxF2iDaAPsDvW6KtLmfB
 // const contenthash = '0xe301017012204edd2984eeaf3ddf50bac238ec95c5713fb40b5e428b508fdbe55d3b9f155ffe';
 // const content = '0x736f6d65436f6e74656e74000000000000000000000000000000000000000000';
-const tld = "ela";
 const toBN = require('web3-utils').toBN
 const {
   legacyRegistrar: legacyRegistrarInterfaceId,
@@ -19,11 +17,14 @@ const {
   bulkRenewal: bulkRenewalInterfaceId,
   linearPremiumPriceOracle: linearPremiumPriceOracleInterfaceId
 } = interfaces
+const config = require("../config.json");
+const { default: BigNumber } = require("bignumber.js");
 
+const tld = config.tld;
 const { sha3 } = web3.utils
 const tldHash = sha3(tld)
-const dnssec = false;
-const exponential = false;
+const dnssec = config.dnssec;
+const exponential = config.exponential;
 
 function namehash(name) {
   let node =
@@ -103,7 +104,7 @@ async function main() {
   await ens.methods.setSubnodeOwner(ROOT_NODE, tldHash, legacyAuctionRegistrar._address).send({ from: accounts[0] })
   console.log('Successfully setup old hash registrar')
 
-  const oldBaseRegistrar = await deploy(web3, accounts[0], oldBaseRegistrarJSON, ens._address, legacyAuctionRegistrar._address, namehash(tld), BigNumber.from(now).add(BigNumber.from(365).mul(24 * 60 * 60)).toString())
+  const oldBaseRegistrar = await deploy(web3, accounts[0], oldBaseRegistrarJSON, ens._address, legacyAuctionRegistrar._address, namehash(tld), BigNumber(now).plus(BigNumber(365).multipliedBy(24 * 60 * 60)).toString())
   console.log('Base registrar deployed at: ', oldBaseRegistrar._address)
   console.log('Successfully setup base registrar')
 
@@ -196,39 +197,46 @@ async function main() {
   await newBaseRegistrar.methods.addController(accounts[0]).send({ from: accounts[0] })
   // Create the new controller
 
-  // 测试部署用
-  console.log('Going to set dummy oracle')
-  const dummyOracleJSON = loadContract('ethregistrar', 'DummyOracle')
-  const dummyOracleRate = toBN(300000000 * 1000)
-  const priceOracleOfCurrentNetwork = await deploy(
-    web3,
-    accounts[0],
-    dummyOracleJSON,
-    dummyOracleRate
-  )
-  const latestAnswer = await priceOracleOfCurrentNetwork.methods.latestAnswer().call()
-  console.log('Dummy USD Rate', { latestAnswer })
-  // 正式部署时用，部署priceOracle时需指定当前链上的AggregatorInterface实现。
-  // const priceOracleOfCurrentNetwork = await WrappedPriceOracle.deploy("0xe848389b35Ca2E9A06faa50b6644C26A871BdD12");　// 这里需要指定实现了AggregatorInterface接口的price oracle合约地址。
-  // await priceOracleOfCurrentNetwork.deployed();
-  // const latestAnswer = await priceOracleOfCurrentNetwork.latestAnswer()
-  // console.log('USD Rate', latestAnswer, priceOracleOfCurrentNetwork.address);
-  // priceOracleOfCurrentNetwork._address = priceOracleOfCurrentNetwork.address;
+  let priceOracleOfCurrentNetwork = null;
+  let latestAnswer = null;
+  let oracleDecimals = null;
+  if (config.priceOracle != "") {
+    // 正式部署时用，部署priceOracle时需指定当前链上的AggregatorInterface实现。
+    priceOracleOfCurrentNetwork = await WrappedPriceOracle.deploy(config.priceOracle);　// 这里需要指定实现了AggregatorInterface接口的price oracle合约地址。
+    await priceOracleOfCurrentNetwork.deployed();
+    latestAnswer = await priceOracleOfCurrentNetwork.latestAnswer();
+    oracleDecimals = await priceOracleOfCurrentNetwork.decimals();
+    priceOracleOfCurrentNetwork._address = priceOracleOfCurrentNetwork.address;
+  } else {
+    // 测试部署用
+    console.log('Going to set dummy oracle')
+    const dummyOracleJSON = loadContract('ethregistrar', 'DummyOracle')
+    const dummyOracleRate = toBN(100000000)
+    priceOracleOfCurrentNetwork = await deploy(
+      web3,
+      accounts[0],
+      dummyOracleJSON,
+      dummyOracleRate
+    )
+    latestAnswer = await priceOracleOfCurrentNetwork.methods.latestAnswer().call()
+    oracleDecimals = 8;
+  }
+  console.log('USD Rate', latestAnswer);
 
   const secondsOfYear = 365 * DAYS;
-  const currencyPrice = latestAnswer / 1e8;
-  const currencyDecimals = 18; // 这里指定部署目标链本币的decimals。
-  const usdPrice = [0, 0, 640, 160, 5]; // 这里指定域名价格，单位为USD/年。
+  const currencyPrice = new BigNumber(latestAnswer).shiftedBy(-oracleDecimals);
+  const currencyDecimals = config.currencyDecimals; // 这里指定部署目标链本币的decimals。
+  const usdPrice = config.priceInUSD; // 这里指定域名价格，单位为USD/年。
   const priceArray = [
     usdPrice[0],
     usdPrice[1],
-    ((usdPrice[2] / currencyPrice / secondsOfYear) * (10 ** currencyDecimals)).toFixed(0),
-    ((usdPrice[3] / currencyPrice / secondsOfYear) * (10 ** currencyDecimals)).toFixed(0),
-    ((usdPrice[4] / currencyPrice / secondsOfYear) * (10 ** currencyDecimals)).toFixed(0)
+    new BigNumber(usdPrice[2]).dividedBy(currencyPrice).dividedBy(secondsOfYear).shiftedBy(currencyDecimals).toFixed(0),
+		new BigNumber(usdPrice[3]).dividedBy(currencyPrice).dividedBy(secondsOfYear).shiftedBy(currencyDecimals).toFixed(0),
+		new BigNumber(usdPrice[4]).dividedBy(currencyPrice).dividedBy(secondsOfYear).shiftedBy(currencyDecimals).toFixed(0)
   ];
   console.log('priceArray', priceArray);
 
-  const premium = toBN('1000000000000000000') // 这里指定premium的价格，关于premium可参考　https://docs.ens.domains/frequently-asked-questions#what-happens-if-i-forget-to-extend-the-registration-of-a-name
+  const premium = toBN(config.premium) // 这里指定premium的价格，关于premium可参考　https://docs.ens.domains/frequently-asked-questions#what-happens-if-i-forget-to-extend-the-registration-of-a-name
   const decreaseDuration = toBN(28 * DAYS)
   const decreaseRate = premium.div(decreaseDuration)
   const linearPremiumPriceOracle = await deploy(web3, accounts[0], linearPremiumPriceOracleJSON, priceOracleOfCurrentNetwork._address, priceArray, premium, decreaseRate)

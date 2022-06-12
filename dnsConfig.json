@@ -1,0 +1,16 @@
+{
+	"newEns": "0x9ef8ecE1Ce1C74221154C3C893913C3F870BB2f0",
+	"newResolver": "0x10b25910CD116a53BC9F8F3fE9466B7705Dbf9bE",
+	"tlds": [
+		"com",
+		"net",
+		"xyz",
+		"org",
+		"io",
+		"finance",
+		"network",
+		"chat",
+		"me",
+		"domains"
+	]
+}

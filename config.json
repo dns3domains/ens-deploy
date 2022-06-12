@@ -1,0 +1,15 @@
+{
+	"tld": "eth",
+	"dnssec": false,
+	"exponential": "false",
+	"priceOracle": "",
+	"priceInUSD": [
+		0,
+		0,
+		4,
+		2,
+		1
+	],
+	"premium": "1000000000000000000",
+	"currencyDecimals": 18
+}
