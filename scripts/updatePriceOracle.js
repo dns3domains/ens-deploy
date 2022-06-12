@@ -40,7 +40,8 @@ async function main() {
 	await linearPremiumPriceOracle.deployed();
 	console.log('linearPremiumPriceOracle:', linearPremiumPriceOracle.address);
 
-	const contract = await ethers.getContractAt("ETHRegistrarController", config.contracts.controller);
+	const controllerJSON = loadContract('ethregistrar', 'ETHRegistrarController')
+	const contract = await ethers.getContractAtFromArtifact(controllerJSON, config.contracts.controller);
 	await contract.functions.setPriceOracle(linearPremiumPriceOracle.address);
 	console.log("更新priceOracle完成");
 }
