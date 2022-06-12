@@ -19,11 +19,11 @@ async function main() {
 	console.log('域名价格（USD/s）数组：', usdPrice);
 
 	const priceArray = [
-		usdPrice[0],
-		usdPrice[1],
-		new BigNumber(usdPrice[2]).dividedBy(currencyPrice).dividedBy(secondsOfYear).shiftedBy(currencyDecimals).toFixed(0),
-		new BigNumber(usdPrice[3]).dividedBy(currencyPrice).dividedBy(secondsOfYear).shiftedBy(currencyDecimals).toFixed(0),
-		new BigNumber(usdPrice[4]).dividedBy(currencyPrice).dividedBy(secondsOfYear).shiftedBy(currencyDecimals).toFixed(0)
+		new BigNumber(usdPrice[0]).dividedBy(secondsOfYear).shiftedBy(8).toFixed(0),
+		new BigNumber(usdPrice[1]).dividedBy(secondsOfYear).shiftedBy(8).toFixed(0),
+		new BigNumber(usdPrice[2]).dividedBy(secondsOfYear).shiftedBy(8).toFixed(0),
+		new BigNumber(usdPrice[3]).dividedBy(secondsOfYear).shiftedBy(8).toFixed(0),
+		new BigNumber(usdPrice[4]).dividedBy(secondsOfYear).shiftedBy(8).toFixed(0)
 	];
 	console.log('域名价格（ETH/s）数组：', priceArray);
 
