@@ -1,15 +1,17 @@
 {
-	"priceOracle": "0x8c8dD24057fDB99b89b95419E56Fe746eECeBec3",
+	"tld": "ela",
+	"priceOracle": "0x67630f7434f3211C7af3e158043ecc5b4138fa30",
 	"priceInUSD": [
 		0,
 		0,
-		4,
-		2,
-		1
+		640,
+		160,
+		5
 	],
 	"premium": "1000000000000000000",
 	"currencyDecimals": 18,
 	"contracts": {
-		"controller": "0xe702C0C242b88bf94F2333163FB5032661388CE2"
+		"controller": "0x70F46dDb5F5B7Ff10Fba7a33073191AaB7F1CFBD",
+		"newResolver": "0xbf4296d057Db7c93529e47B510B9F09F0A5B0a52"
 	}
 }

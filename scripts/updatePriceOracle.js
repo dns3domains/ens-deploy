@@ -1,13 +1,32 @@
 const { default: BigNumber } = require("bignumber.js");
+const { web3 } = require("hardhat");
 const hre = require("hardhat");
+const { sha3 } = require("web3-utils");
 const ethers = hre.ethers;
 const config = require("../priceConfig.json");
 const { loadContract } = require("./utils");
 
 const DAYS = 86400;
 
+function namehash(name) {
+	let node =
+		'0x0000000000000000000000000000000000000000000000000000000000000000'
+	if (name !== '') {
+		let labels = name.split('.')
+		for (let i = labels.length - 1; i >= 0; i--) {
+			node = sha3(node + sha3(labels[i]).slice(2), {
+				encoding: 'hex',
+			})
+		}
+	}
+	return node.toString()
+}
+
 async function main() {
-	console.log("检查priceOracle：")
+	const signers = await ethers.getSigners();
+	const accounts = signers.map(s => s.address);
+	console.log("执行者", accounts[0]);
+
 	const priceOracle = await ethers.getContractAt("WrappedPriceOracle", config.priceOracle);
 	const latestAnswer = await priceOracle.functions.latestAnswer();
 	const currencyPrice = latestAnswer / 1e8;
@@ -44,6 +63,11 @@ async function main() {
 	const contract = await ethers.getContractAtFromArtifact(controllerJSON, config.contracts.controller);
 	await contract.functions.setPriceOracle(linearPremiumPriceOracle.address);
 	console.log("更新priceOracle完成");
+
+	const resolverJSON = loadContract('resolvers', 'PublicResolver');
+	const newResolver = new web3.eth.Contract(resolverJSON.abi, config.contracts.newResolver);
+	await newResolver.methods.setAddr(namehash('eth-usd.data.' + config.tld), config.priceOracle).send({ from: accounts[0] });
+	console.log("更新", "eth-usd.data." + config.tld, "完成");
 }
 
 main()
