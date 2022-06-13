@@ -5,7 +5,8 @@
     "compile": "hardhat compile",
     "update-price": "hardhat run --network \"${npm_config_network}\" scripts/updatePriceOracle.js",
     "deploy": "hardhat run --network \"${npm_config_network}\" scripts/deploy.js",
-    "deploy-dnssec": "hardhat run --network \"${npm_config_network}\" scripts/deployDNS.js"
+    "deploy-dnssec": "hardhat run --network \"${npm_config_network}\" scripts/deployDNS.js",
+    "deploy-aggregator": "AGGREGATOR_ADDR=\"${npm_config_addr}\" hardhat run --network \"${npm_config_network}\" scripts/deployPriceOracle.js"
   },
   "devDependencies": {
     "@ensdomains/dnssec-oracle-anchors": "^0.0.1",

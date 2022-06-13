@@ -201,7 +201,7 @@ async function main() {
   let latestAnswer = null;
   let oracleDecimals = null;
   if (config.priceOracle != "") {
-    // 正式部署时用，部署priceOracle时需指定当前链上的AggregatorInterface实现。
+    // 正式部署时用，部署priceOracle时需指定当前链上的 AggregatorInterface 实现。
     priceOracleOfCurrentNetwork = await WrappedPriceOracle.deploy(config.priceOracle);　// 这里需要指定实现了AggregatorInterface接口的price oracle合约地址。
     await priceOracleOfCurrentNetwork.deployed();
     latestAnswer = await priceOracleOfCurrentNetwork.latestAnswer();
