@@ -1,14 +1,14 @@
 {
-	"tld": "eth",
+	"tld": "ela",
 	"dnssec": false,
 	"exponential": "false",
-	"priceOracle": "",
+	"priceOracle": "0xe848389b35Ca2E9A06faa50b6644C26A871BdD12",
 	"priceInUSD": [
 		0,
 		0,
-		4,
-		2,
-		1
+		640,
+		160,
+		5
 	],
 	"premium": "1000000000000000000",
 	"currencyDecimals": 18
