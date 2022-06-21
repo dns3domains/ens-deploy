@@ -104,6 +104,13 @@ async function deployDNSSEC(web3, accounts, ens, resolver, tlds) {
     await setupDomain(dnssecNew, registrarNew, tld);
   }
 
+  console.log('===================================================')
+  console.log('Deployed contracts')
+  console.log('===================================================')
+  console.log("registrarOld:", registrarOld._address);
+  console.log("registrarNew:", registrarNew._address);
+  console.log('===================================================')
+
   return { dnssecOld, dnssecNew }
 }
 
