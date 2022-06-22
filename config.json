@@ -1,7 +1,7 @@
 {
 	"tld": "ela",
 	"dnssec": false,
-	"exponential": "false",
+	"exponential": false,
 	"priceOracle": "0xe848389b35Ca2E9A06faa50b6644C26A871BdD12",
 	"priceInUSD": [
 		0,
