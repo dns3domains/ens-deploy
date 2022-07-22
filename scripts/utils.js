@@ -1,5 +1,6 @@
 const util = require('util')
-const moment = require('moment')
+const moment = require('moment');
+const hardhatConfig = require('../hardhat.config');
 const DAYS = 86400;
 
 const advanceTime = util.promisify(function (web3, delay, done) {
@@ -23,6 +24,24 @@ const mine = util.promisify(function (web3, done) {
   )
 })
 
+const getGas = (estimatedGas = 0) => {
+  const tempObject = {};
+
+  const g = hardhatConfig.networks[process.env.npm_config_network].gas;
+  if (estimatedGas > 0) {
+    tempObject.gas = estimatedGas;
+  } else if (g && (typeof g) === "number") {
+    tempObject.gas = g;
+  }
+
+  const price = hardhatConfig.networks[process.env.npm_config_network].gasPrice;
+  if (price && (typeof price) === "number") {
+    tempObject.gasPrice = price;
+  }
+
+  return tempObject;
+}
+
 const registerName = async function (
   web3,
   account,
@@ -42,7 +61,7 @@ const registerName = async function (
   const value = await controllerContract.rentPrice(name, duration).call()
   const trx = await controllerContract
     .register(name, account, duration, secret)
-    .send({ from: account, value: value, gas: 6000000 })
+    .send({ from: account, value: value, ...getGas() })
 
   const registeredAt = moment(
     (await web3.eth.getBlock('latest')).timestamp * 1000
@@ -85,18 +104,18 @@ async function auctionLegacyNameWithoutFinalise(
 
   await registrarContract
     .startAuction(labelhash)
-    .send({ from: account, gas: 6000000 })
+    .send({ from: account, ...getGas() })
 
   await registrarContract
     .newBid(bidhash)
-    .send({ from: account, value: value, gas: 6000000 })
+    .send({ from: account, value: value, ...getGas() })
   await registrarContract.state(labelhash).call()
   await advanceTime(web3, parseInt(auctionlength - reveallength + 100))
   await mine(web3)
   await registrarContract.state(labelhash).call()
   await registrarContract
     .unsealBid(labelhash, value, salt)
-    .send({ from: account, gas: 6000000 })
+    .send({ from: account, ...getGas() })
   await advanceTime(web3, parseInt(reveallength * 2))
   await mine(web3)
 }
@@ -113,7 +132,7 @@ const auctionLegacyName = async function (
   await registrarContract.state(labelhash).call()
   await registrarContract
     .finalizeAuction(labelhash)
-    .send({ from: account, gas: 6000000 })
+    .send({ from: account, ...getGas() })
 }
 
 function loadContract(modName, contractPath) {
@@ -127,17 +146,26 @@ function loadContract(modName, contractPath) {
   return require(loadpath)
 }
 
-function deploy(web3, account, contractJSON, ...args) {
+async function deploy(web3, account, contractJSON, ...args) {
   const contract = new web3.eth.Contract(contractJSON.abi)
-  return contract
-    .deploy({
-      data: contractJSON.bytecode,
-      arguments: args,
-    })
-    .send({
-      from: account,
-      gas: 6700000,
-    })
+  const func = contract.deploy({
+    data: contractJSON.bytecode,
+    arguments: args,
+  });
+  const gas = await func.estimateGas({ from: account })
+  return func.send({
+    from: account,
+    ...getGas(gas)
+  })
+  .on('error', function (error) {
+    console.log("　　部署合约中……", error)
+  }).on('transactionHash', function (transactionHash) {
+    console.log("　　部署合约中……", transactionHash)
+  }).on('receipt', function (receipt) {
+    console.log("　　部署合约中……", receipt.contractAddress) // contains the new contract address
+  }).on('confirmation', function (confirmationNumber, receipt) {
+    console.log("　　部署合约中……", confirmationNumber, receipt.contractAddress) // contains the new contract address
+  });
 }
 
 function loadOldContract(modName, contractName) {
@@ -145,4 +173,4 @@ function loadOldContract(modName, contractName) {
   return require(loadpath)
 }
 
-module.exports = { DAYS, mine, advanceTime, auctionLegacyName, registerName, loadContract, loadOldContract, deploy }
+module.exports = { DAYS, mine, advanceTime, auctionLegacyName, registerName, loadContract, loadOldContract, deploy, getGas }

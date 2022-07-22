@@ -4,7 +4,7 @@ const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
 const ROOT_NODE = '0x00000000000000000000000000000000';
 const Web3 = require('web3');
 const interfaces = require('./interfaces');
-const { DAYS, registerName, loadContract, deploy } = require("./utils");
+const { DAYS, registerName, loadContract, deploy, getGas } = require("./utils");
 const deployDNSSEC = require("./deployDNSSEC");
 // ipfs://QmTeW79w7QQ6Npa3b1d5tANreCDxF2iDaAPsDvW6KtLmfB
 // const contenthash = '0xe301017012204edd2984eeaf3ddf50bac238ec95c5713fb40b5e428b508fdbe55d3b9f155ffe';
@@ -19,6 +19,7 @@ const {
 } = interfaces
 const config = require("../config.json");
 const { default: BigNumber } = require("bignumber.js");
+const hardhatConfig = require("../hardhat.config");
 
 const tld = config.tld;
 const { sha3 } = web3.utils
@@ -185,7 +186,7 @@ async function main() {
   // await oldResolver.methods.setContent(namehash('oldresolver.' + tld), content).send({ from: accounts[0] })
 
   /* Setup a reverse for account[0] to eth tld  */
-  await oldReverseRegistrar.methods.setName(tld).send({ from: accounts[0], gas: 1000000 })
+  await oldReverseRegistrar.methods.setName(tld).send({ from: accounts[0], ...getGas() })
 
   const oldSubdomainRegistrar = await deploy(web3, accounts[0], EthRegistrarSubdomainRegistrarJSON, ens._address)
   const subdomainRegistrar = await deploy(web3, accounts[0], ENSMigrationSubdomainRegistrarJSON, ens._address)
@@ -272,7 +273,7 @@ async function main() {
   }
 
   await newEns.methods.setSubnodeOwner(ROOT_NODE, sha3(tld), accounts[0]).send({ from: accounts[0] })
-  await newEns.methods.setResolver(namehash(tld), newResolver._address).send({ from: accounts[0], gas: 6000000 })
+  await newEns.methods.setResolver(namehash(tld), newResolver._address).send({ from: accounts[0], ...getGas() })
   await newResolver.methods.setApprovalForAll(newController._address, true).send({ from: accounts[0] })
   await newResolver.methods.setInterface(namehash(tld), permanentRegistrarInterfaceId, newController._address).send({ from: accounts[0] })
   await newResolver.methods.setInterface(namehash(tld), permanentRegistrarWithConfigInterfaceId, newController._address).send({ from: accounts[0] })
@@ -308,7 +309,7 @@ async function main() {
         console.log(`${domain} is not owned by ${accounts[0]} hence not setting ttl nor resolver`)
       }
 
-      await registrarMigration.methods.migrate(labelhash).send({ from: accounts[0], gas: 6000000 })
+      await registrarMigration.methods.migrate(labelhash).send({ from: accounts[0], ...getGas() })
     }
   } catch (e) {
     console.log('Failed to migrate a name', e)
