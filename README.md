@@ -4,7 +4,7 @@
 
 ### 准备工作：
 
-1. 检查`/hardhat.config.js`，补充目标链的相关配置。
+1. 检查`/hardhat.config.js`，补充目标链的相关配置，根据链的参数配置最新的gas和gasPrice可以解决大多数链上部署错误。
 2. 修改`/config.json`中的必要配置，如果目标链上没有可用的（实现了`AggregatorInterface`的）priceOracle的话，以下《`D 部署priceOracle`》提供了部署一个封装较通用的`AggregatorInterfaceV3`合约的方法。
 
 ### 然后执行：

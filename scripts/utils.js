@@ -157,15 +157,15 @@ async function deploy(web3, account, contractJSON, ...args) {
     from: account,
     ...getGas(gas)
   })
-  .on('error', function (error) {
-    console.log("　　部署合约中……", error)
-  }).on('transactionHash', function (transactionHash) {
-    console.log("　　部署合约中……", transactionHash)
-  }).on('receipt', function (receipt) {
-    console.log("　　部署合约中……", receipt.contractAddress) // contains the new contract address
-  }).on('confirmation', function (confirmationNumber, receipt) {
-    console.log("　　部署合约中……", confirmationNumber, receipt.contractAddress) // contains the new contract address
-  });
+  // .on('error', function (error) {
+  //   console.log("　　部署合约中……", error)
+  // }).on('transactionHash', function (transactionHash) {
+  //   console.log("　　部署合约中……", transactionHash)
+  // }).on('receipt', function (receipt) {
+  //   console.log("　　部署合约中……", receipt.contractAddress) // contains the new contract address
+  // }).on('confirmation', function (confirmationNumber, receipt) {
+  //   console.log("　　部署合约中……", confirmationNumber, receipt.contractAddress) // contains the new contract address
+  // });
 }
 
 function loadOldContract(modName, contractName) {
